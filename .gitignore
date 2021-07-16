@@ -1,3 +1,7 @@
+# Tab separated file (training & test data)
+*.tsv
+*.tsv.gz
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
