@@ -270,7 +270,7 @@
     <rect>
      <x>240</x>
      <y>410</y>
-     <width>371</width>
+     <width>311</width>
      <height>41</height>
     </rect>
    </property>
@@ -285,7 +285,7 @@
     <rect>
      <x>240</x>
      <y>460</y>
-     <width>371</width>
+     <width>311</width>
      <height>41</height>
     </rect>
    </property>
@@ -390,7 +390,7 @@
     <rect>
      <x>240</x>
      <y>360</y>
-     <width>371</width>
+     <width>311</width>
      <height>41</height>
     </rect>
    </property>
@@ -488,6 +488,60 @@
    </property>
    <property name="indent">
     <number>10</number>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="mentionsDialogButton">
+   <property name="geometry">
+    <rect>
+     <x>560</x>
+     <y>410</y>
+     <width>51</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>16</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>...</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="hashtagsDialogButton">
+   <property name="geometry">
+    <rect>
+     <x>560</x>
+     <y>460</y>
+     <width>51</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>16</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>...</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="datetimeDialogButton">
+   <property name="geometry">
+    <rect>
+     <x>560</x>
+     <y>360</y>
+     <width>51</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>16</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>...</string>
    </property>
   </widget>
  </widget>
