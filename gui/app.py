@@ -23,17 +23,29 @@ class Main(qtw.QWidget, Ui_Form):
 		self.setWindowTitle("Retweet Prediction App")
 
 		# state values
-		# self.latex_text = ""
-		# self.file_path = ""
+		self.prediction_value_label = "-"
+		self.true_value_label = "-"
 
 		# attach button to function
-		# self.browseImageButton.clicked.connect(self.browse_image)
-		# self.loadImageButton.clicked.connect(self.load_image)
-		# self.translateButton.clicked.connect(self.translate_to_latex)
-		# self.renderButton.clicked.connect(self.render_latex)
+		self.randomizeButton.clicked.connect(self.randomize)
+		self.predictButton.clicked.connect(self.predict)
 
-		# auto-complete feauture
-		# self.filePathEdit.setText(self.file_path)
+		# setup
+		self._update_values(self.prediction_value_label, self.predictionValueLabel)
+		self._update_values(self.true_value_label, self.trueValueLabel)
+
+	def randomize(self):
+		print("clicked.")
+
+	def predict(self):
+		print("clocked.")
+
+	def _read_values(self):
+		pass
+
+	def _update_values(self, string, label):
+		label.setText(string)
+		print(f"{label} set to {string}")
 
 	def center_window(self):
 		"""
