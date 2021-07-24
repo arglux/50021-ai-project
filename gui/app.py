@@ -1,6 +1,7 @@
 import sys
 import sympy
-from pathlib import Path
+import random
+
 from datetime import datetime
 
 from PyQt5 import QtCore as qtc
@@ -25,6 +26,7 @@ class Main(qtw.QWidget, Ui_Form):
 		# state values
 		self.prediction_value_label = "-"
 		self.true_value_label = "-"
+		self.values = []
 
 		# attach button to function
 		self.randomizeButton.clicked.connect(self.randomize)
@@ -35,13 +37,51 @@ class Main(qtw.QWidget, Ui_Form):
 		self._update_values(self.true_value_label, self.trueValueLabel)
 
 	def randomize(self):
-		print("clicked.")
+		self.numOfFollowersEdit.setText( str(random.randint(0, 1000)) )
+		self.numOfFriendsEdit.setText( str(random.randint(0, 1000)) )
+		self.numOfFavoritesEdit.setText( str(random.randint(0, 1000)) )
+
+		self.sentimentEdit.setText( f"{random.randint(-5, -1)} - {random.randint(1, 5)}" )
+
+		self.datetimeEdit.setText( "hello" )
+
+		self.mentionsEdit.setText( "realDonaldTrump" )
+		self.hashtagsEdit.setText( "COVID19" )
+
+		self.urlEdit.setText(" www.google.com ")
 
 	def predict(self):
-		print("clocked.")
+		# read values
+		self.values = self._read_values()
+
+		# feed into model
+
+		# show result
+		self.prediction_value_label = str(random.randint(0, 1000))
+		self.true_value_label = str(random.randint(0, 1000))
+		self._update_values(self.prediction_value_label, self.predictionValueLabel)
+		self._update_values(self.true_value_label, self.trueValueLabel)
 
 	def _read_values(self):
-		pass
+		numOfFollowers = int( self.numOfFollowersEdit.text() )
+		numOfFriends = int(  self.numOfFriendsEdit.text() )
+		numOfFavorites = int( self.numOfFavoritesEdit.text() )
+		sentiment = self.sentimentEdit.text()
+		datetime = self.datetimeEdit.text()
+		mentions = self.mentionsEdit.text()
+		hashtags = self.hashtagsEdit.text()
+		url = self.urlEdit.text()
+
+		print([
+		      	numOfFollowers,
+		      	numOfFriends,
+		      	numOfFavorites,
+		      	sentiment,
+		      	datetime,
+		      	mentions,
+		      	hashtags,
+		      	url
+		      ])
 
 	def _update_values(self, string, label):
 		label.setText(string)
