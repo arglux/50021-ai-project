@@ -48,7 +48,7 @@ class Main(qtw.QWidget, Ui_Form):
 		self.mentionsEdit.setText( "realDonaldTrump" )
 		self.hashtagsEdit.setText( "COVID19" )
 
-		self.urlEdit.setText(" www.google.com ")
+		self.urlEdit.setText( "www.google.com" )
 
 	def predict(self):
 		# read values
