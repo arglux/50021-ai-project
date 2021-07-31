@@ -34,22 +34,33 @@ def coerce_datatype(inp, spread_vector=False):
 		'Hashtag Embedding'
 		]
 	"""
-	print(inp)
+	print('raw input:', inp)
+	values = {}
 
-	values = inp[:2] #Followers, #Friends
-	values.append(0) #Retweets
-	values.append(inp[2]) #Favorites
+	values['#Followers'] = inp['#Followers']
+	values['#Friends'] = inp['#Friends']
+	values['#Retweets'] = [0] # TODO: replace with actual values from test set
+	values['#Favorites'] = inp['#Favorites']
 
+	positive, negative, disparity = extract_sentiment_features(pd.DataFrame(inp), 'Sentiment')
+	values['Positive'] = positive
+	values['Negative'] = negative
+	values['Disparity'] = disparity
 
-	print(values)
-	print(inp)
+	values['No. of Entities'] = [0]
 
-	inp_dict = dict(zip(clean_headers, [[val] for val in values])) # must pass in list for each key's value
-	out = pd.DataFrame(inp_dict)
+	day, month, sec = extract_timestamp_features(pd.DataFrame(inp), 'Timestamp')
+	values['Day of Week'] = day
+	values['Month'] = month
+	values['Time Int'] = sec
+
+	print('values:', values)
+	out = pd.DataFrame(values) # must pass in list for each key's value
+
 	return out
 
 if __name__ == '__main__':
-	inp = [825, 773, 33, '-2 - 1', 'Sat Jul 31 13:47:52 +0000 2021', 'realDonaldTrump', 'COVID19', 'www.google.com']
+	inp = {'#Followers': [854], '#Friends': [217], '#Favorites': [843], 'Sentiment': ['-5 5'], 'Timestamp': ['Sat Jul 31 14:25:21 +0000 2021'], 'Mentions': ['realDonaldTrump'], 'Hashtags': ['COVID19'], 'URLs': ['www.google.com']}
 
 	model_inp = coerce_datatype(inp)
 	print(model_inp)

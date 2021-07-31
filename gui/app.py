@@ -63,7 +63,7 @@ class Main(qtw.QWidget, Ui_Form):
 		self.numOfFriendsEdit.setText( str(random.randint(0, 1000)) )
 		self.numOfFavoritesEdit.setText( str(random.randint(0, 1000)) )
 
-		self.sentimentEdit.setText( f"{random.randint(-5, -1)} - {random.randint(1, 5)}" )
+		self.sentimentEdit.setText( f"{random.randint(1, 5)} {random.randint(-5, -1)}" )
 
 		self.datetimeEdit.setText( now )
 
@@ -89,14 +89,15 @@ class Main(qtw.QWidget, Ui_Form):
 		self._update_values(self.true_value_label, self.trueValueLabel)
 
 	def _read_values(self):
-		numOfFollowers = int( self.numOfFollowersEdit.text() )
-		numOfFriends = int(  self.numOfFriendsEdit.text() )
-		numOfFavorites = int( self.numOfFavoritesEdit.text() )
-		sentiment = self.sentimentEdit.text()
-		datetime = self.datetimeEdit.text()
-		mentions = self.mentionsEdit.text()
-		hashtags = self.hashtagsEdit.text()
-		url = self.urlEdit.text()
+		# all values are read as list to standardize (easier to turn into DataFrame also)
+		numOfFollowers = [int( self.numOfFollowersEdit.text() )]
+		numOfFriends = [int(  self.numOfFriendsEdit.text() )]
+		numOfFavorites = [int( self.numOfFavoritesEdit.text() )]
+		sentiment = [self.sentimentEdit.text()]
+		datetime = [self.datetimeEdit.text()]
+		mentions = [self.mentionsEdit.text()]
+		hashtags = [self.hashtagsEdit.text()]
+		url = [self.urlEdit.text()]
 
 		return([
 		      	numOfFollowers,
