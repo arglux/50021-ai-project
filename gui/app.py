@@ -46,7 +46,7 @@ class Main(qtw.QWidget, Ui_Form):
 			"Timestamp",
 			"Mentions",
 			"Hashtags",
-			"URLs"
+			"No. of Entities"
 		]
 
 		# load model
@@ -70,7 +70,7 @@ class Main(qtw.QWidget, Ui_Form):
 		self.mentionsEdit.setText( "realDonaldTrump" )
 		self.hashtagsEdit.setText( "COVID19" )
 
-		self.urlEdit.setText( "www.google.com" )
+		self.entitiesCountEdit.setText( str(random.randint(0, 3)) )
 
 	def predict(self):
 		# read values
@@ -97,7 +97,7 @@ class Main(qtw.QWidget, Ui_Form):
 		datetime = [self.datetimeEdit.text()]
 		mentions = [self.mentionsEdit.text()]
 		hashtags = [self.hashtagsEdit.text()]
-		url = [self.urlEdit.text()]
+		entitiesCount = [self.entitiesCountEdit.text()]
 
 		return([
 		      	numOfFollowers,
@@ -107,7 +107,7 @@ class Main(qtw.QWidget, Ui_Form):
 		      	datetime,
 		      	mentions,
 		      	hashtags,
-		      	url
+		      	entitiesCount
 		      ])
 
 	def _update_values(self, string, label):

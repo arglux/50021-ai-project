@@ -42,6 +42,9 @@ def sort_counts_by_frequency(counts, total, cutoff=0.2, min_frequency=200):
 
 	return most_popular_list
 
+def vectorize_using_embedding(values, embedding):
+	pass
+
 if __name__ == '__main__':
 	print("OK")
 

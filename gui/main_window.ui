@@ -415,7 +415,7 @@
     </font>
    </property>
    <property name="text">
-    <string>URL links:</string>
+    <string>No. of Entities:</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -424,7 +424,7 @@
     <number>10</number>
    </property>
   </widget>
-  <widget class="QLineEdit" name="urlEdit">
+  <widget class="QLineEdit" name="entitiesCountEdit">
    <property name="geometry">
     <rect>
      <x>240</x>
