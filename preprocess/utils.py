@@ -1,5 +1,3 @@
-from headers import *
-
 import numpy as np
 import pandas as pd
 
@@ -42,8 +40,16 @@ def sort_counts_by_frequency(counts, total, cutoff=0.2, min_frequency=200):
 
 	return most_popular_list
 
-def vectorize_using_embedding(values, embedding):
-	pass
+def vectorize_using_embedding(values, embedding, size=25):
+	zero = np.zeros(size)
+	print(embedding.wv[values])
+
+	for val in values:
+		if values in embedding.wv.index_to_key:
+			zero += embedding.wv[val]
+
+	return zero
+
 
 if __name__ == '__main__':
 	print("OK")

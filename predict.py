@@ -1,7 +1,10 @@
 from model import Net
+from gensim.models import Word2Vec
+
 from preprocess.headers import *
 from preprocess.sentiment import *
 from preprocess.timestamp import *
+# from preprocess.utils import vectorize_using_embedding
 
 import torch
 import pandas as pd
@@ -34,7 +37,10 @@ def coerce_datatype(inp, spread_vector=False):
 		'Hashtag Embedding'
 		]
 	"""
+	# hashtag_embeddings = Word2Vec.load('./data/hashtag_embeddings')
+	# mention_embeddings = Word2Vec.load('./data/mention_embeddings')
 	print('raw input:', inp)
+
 	values = {}
 
 	values['#Followers'] = inp['#Followers']
@@ -53,6 +59,9 @@ def coerce_datatype(inp, spread_vector=False):
 	values['Day of Week'] = day
 	values['Month'] = month
 	values['Time Int'] = sec
+
+	# values['Mention Embedding'] = vectorize_using_embedding(inp['Mentions'], mention_embeddings)
+	# values['Hashtag Embedding'] = vectorize_using_embedding(inp['Hashtags'], hashtag_embeddings)
 
 	print('values:', values)
 	out = pd.DataFrame(values) # must pass in list for each key's value

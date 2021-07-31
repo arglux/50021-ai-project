@@ -67,8 +67,8 @@ class Main(qtw.QWidget, Ui_Form):
 
 		self.datetimeEdit.setText( now )
 
-		self.mentionsEdit.setText( "realDonaldTrump" )
-		self.hashtagsEdit.setText( "COVID19" )
+		self.mentionsEdit.setText( "realDonaldTrump, PMOIndia" )
+		self.hashtagsEdit.setText( "COVID19, coronavirus" )
 
 		self.entitiesCountEdit.setText( str(random.randint(0, 3)) )
 
@@ -95,8 +95,8 @@ class Main(qtw.QWidget, Ui_Form):
 		numOfFavorites = [int( self.numOfFavoritesEdit.text() )]
 		sentiment = [self.sentimentEdit.text()]
 		datetime = [self.datetimeEdit.text()]
-		mentions = [self.mentionsEdit.text()]
-		hashtags = [self.hashtagsEdit.text()]
+		mentions = self.mentionsEdit.text().split(',')
+		hashtags = self.hashtagsEdit.text().split(',')
 		entitiesCount = [self.entitiesCountEdit.text()]
 
 		return([
