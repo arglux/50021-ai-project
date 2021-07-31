@@ -1,7 +1,9 @@
 import sys
-import sympy
 import random
 
+sys.path.append("../") # to access predict.py
+
+from predict import *
 from datetime import datetime
 
 from PyQt5 import QtCore as qtc
@@ -36,14 +38,23 @@ class Main(qtw.QWidget, Ui_Form):
 		self._update_values(self.prediction_value_label, self.predictionValueLabel)
 		self._update_values(self.true_value_label, self.trueValueLabel)
 
+		# load model
+		model_path = '../models/dummy-model-2706-2356'
+		inp_size = 49
+		out_size = 1
+		device = 'cpu'
+		self.model = load_model(model_path, inp_size, out_size)
+
 	def randomize(self):
+		now = str(datetime.now().strftime('%a %b %d %H:%M:%S +0000 %Y')) # EEE MMM dd HH:mm:ss Z yyyy
+
 		self.numOfFollowersEdit.setText( str(random.randint(0, 1000)) )
 		self.numOfFriendsEdit.setText( str(random.randint(0, 1000)) )
 		self.numOfFavoritesEdit.setText( str(random.randint(0, 1000)) )
 
 		self.sentimentEdit.setText( f"{random.randint(-5, -1)} - {random.randint(1, 5)}" )
 
-		self.datetimeEdit.setText( "hello" )
+		self.datetimeEdit.setText( now )
 
 		self.mentionsEdit.setText( "realDonaldTrump" )
 		self.hashtagsEdit.setText( "COVID19" )
@@ -55,6 +66,7 @@ class Main(qtw.QWidget, Ui_Form):
 		self.values = self._read_values()
 
 		# feed into model
+		predict(self.model, "OK")
 
 		# show result
 		self.prediction_value_label = str(random.randint(0, 1000))
