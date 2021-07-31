@@ -38,6 +38,17 @@ class Main(qtw.QWidget, Ui_Form):
 		self._update_values(self.prediction_value_label, self.predictionValueLabel)
 		self._update_values(self.true_value_label, self.trueValueLabel)
 
+		self.headers = [
+			"#Followers",
+			"#Friends",
+			"#Favorites",
+			"Sentiment",
+			"Timestamp",
+			"Mentions",
+			"Hashtags",
+			"URLs"
+		]
+
 		# load model
 		model_path = '../models/dummy-model-2706-2356'
 		inp_size = 49
@@ -65,8 +76,11 @@ class Main(qtw.QWidget, Ui_Form):
 		# read values
 		self.values = self._read_values()
 
+		# coerce datatypes
+		self.input = coerce_datatype( dict(zip(self.headers, self.values)) )
+
 		# feed into model
-		predict(self.model, "OK")
+		predict(self.model, self.input)
 
 		# show result
 		self.prediction_value_label = str(random.randint(0, 1000))
@@ -84,7 +98,7 @@ class Main(qtw.QWidget, Ui_Form):
 		hashtags = self.hashtagsEdit.text()
 		url = self.urlEdit.text()
 
-		print([
+		return([
 		      	numOfFollowers,
 		      	numOfFriends,
 		      	numOfFavorites,
@@ -94,9 +108,6 @@ class Main(qtw.QWidget, Ui_Form):
 		      	hashtags,
 		      	url
 		      ])
-
-	def _extract_values():
-		pass
 
 	def _update_values(self, string, label):
 		label.setText(string)

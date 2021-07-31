@@ -1,5 +1,3 @@
-from headers import *
-
 import datetime
 import pandas as pd
 
@@ -40,11 +38,12 @@ def extract_timestamp_features(data, col_name):
 		date = datetime.datetime.strptime(i, '%a %b %d %H:%M:%S +0000 %Y')
 		sec.append(str((date - datetime.datetime(2019, 1, 1)).total_seconds())[:-2])
 
-	# simply append the return values  to DataFrame > df['col_name'] = ...
-	return pd.Series(day), pd.Series(month), pd.Series(sec)
+	# simply append the return values to DataFrame > df['col_name'] = pd.Series(...)
+	return day, month, sec
 
 if __name__ == '__main__':
 	# Timestamp: Format ( "EEE MMM dd HH:mm:ss Z yyyy" ). ISOString => integer (e.g. 23517957).
+	from headers import *
 
 	data = pd.read_csv("../data/TweetsCOV19_052020.tsv.gz", compression='gzip', names=headers, sep='\t', quotechar='"')
 	print("OK")
