@@ -83,6 +83,9 @@ class Main(qtw.QWidget, Ui_Form):
 		      	url
 		      ])
 
+	def _extract_values():
+		pass
+
 	def _update_values(self, string, label):
 		label.setText(string)
 		print(f"{label} set to {string}")
