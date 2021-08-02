@@ -80,23 +80,22 @@ class Main(qtw.QWidget, Ui_Form):
 		self.entitiesCountEdit.setText( str(len(data_point['Entities'].split(' '))) )
 
 		self.trueValueIndex.setText(f'Data referenced. Index: {index}. Tweet Id: {tweet_id}.')
-		self.trueValueLabel.setText( str(data_point['#Retweets']))
+		self.true_value_label = str(data_point['#Retweets'])
+		self._update_values(self.true_value_label, self.trueValueLabel)
 
 	def predict(self):
 		# read values
 		self.values = self._read_values()
 
 		# coerce datatypes
-		self.input = coerce_datatype( dict(zip(self.headers, self.values)) )
+		self.input = 'this' # coerce_datatype( dict(zip(self.headers, self.values)) )
 
 		# feed into model
 		predict(self.model, self.input)
 
 		# show result
 		self.prediction_value_label = str(random.randint(0, 1000))
-		self.true_value_label = str(random.randint(0, 1000))
 		self._update_values(self.prediction_value_label, self.predictionValueLabel)
-		self._update_values(self.true_value_label, self.trueValueLabel)
 
 	def _read_values(self):
 		# all values are read as list to standardize (easier to turn into DataFrame also)
