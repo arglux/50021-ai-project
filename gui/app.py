@@ -4,6 +4,7 @@ import random
 sys.path.append("../") # to access predict.py
 
 from predict import *
+from preprocess.headers import headers
 from datetime import datetime
 
 from PyQt5 import QtCore as qtc
@@ -29,6 +30,9 @@ class Main(qtw.QWidget, Ui_Form):
 		self.prediction_value_label = "-"
 		self.true_value_label = "-"
 		self.values = []
+
+		print("Loading... This may take a while (~3 mins) depending on test set size...") # line below
+		self.data = pd.read_csv("../data/TweetsCOV19_052020.tsv.gz", compression='gzip', names=headers, sep='\t', quotechar='"')
 
 		# attach button to function
 		self.randomizeButton.clicked.connect(self.randomize)
@@ -57,20 +61,26 @@ class Main(qtw.QWidget, Ui_Form):
 		self.model = load_model(model_path, inp_size, out_size)
 
 	def randomize(self):
-		now = str(datetime.now().strftime('%a %b %d %H:%M:%S +0000 %Y')) # EEE MMM dd HH:mm:ss Z yyyy
+		index = random.randint(0, len(self.data.index))
+		data_point = self.data.iloc[index]
+		tweet_id = str(data_point['Tweet Id'])
 
-		self.numOfFollowersEdit.setText( str(random.randint(0, 1000)) )
-		self.numOfFriendsEdit.setText( str(random.randint(0, 1000)) )
-		self.numOfFavoritesEdit.setText( str(random.randint(0, 1000)) )
+		# now = str(datetime.now().strftime('%a %b %d %H:%M:%S +0000 %Y')) # EEE MMM dd HH:mm:ss Z yyyy
 
-		self.sentimentEdit.setText( f"{random.randint(1, 5)} {random.randint(-5, -1)}" )
+		self.numOfFollowersEdit.setText( str(data_point['#Followers']) )
+		self.numOfFriendsEdit.setText( str(data_point['#Friends']) )
+		self.numOfFavoritesEdit.setText( str(data_point['#Favorites']) )
 
-		self.datetimeEdit.setText( now )
+		self.sentimentEdit.setText( str(data_point['Sentiment']) )
+		self.datetimeEdit.setText( str(data_point['Timestamp']) )
 
-		self.mentionsEdit.setText( "realDonaldTrump, PMOIndia" )
-		self.hashtagsEdit.setText( "COVID19, coronavirus" )
+		self.mentionsEdit.setText( str(data_point['Mentions']) )
+		self.hashtagsEdit.setText( str(data_point['Hashtags']) )
 
-		self.entitiesCountEdit.setText( str(random.randint(0, 3)) )
+		self.entitiesCountEdit.setText( str(len(data_point['Entities'].split(' '))) )
+
+		self.trueValueIndex.setText(f'Data referenced. Index: {index}. Tweet Id: {tweet_id}.')
+		self.trueValueLabel.setText( str(data_point['#Retweets']))
 
 	def predict(self):
 		# read values
@@ -95,8 +105,8 @@ class Main(qtw.QWidget, Ui_Form):
 		numOfFavorites = [int( self.numOfFavoritesEdit.text() )]
 		sentiment = [self.sentimentEdit.text()]
 		datetime = [self.datetimeEdit.text()]
-		mentions = self.mentionsEdit.text().split(',')
-		hashtags = self.hashtagsEdit.text().split(',')
+		mentions = self.mentionsEdit.text().split(' ')
+		hashtags = self.hashtagsEdit.text().split(' ')
 		entitiesCount = [self.entitiesCountEdit.text()]
 
 		return([

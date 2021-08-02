@@ -119,7 +119,7 @@
    <property name="geometry">
     <rect>
      <x>630</x>
-     <y>310</y>
+     <y>300</y>
      <width>481</width>
      <height>51</height>
     </rect>
@@ -270,7 +270,7 @@
     <rect>
      <x>240</x>
      <y>410</y>
-     <width>311</width>
+     <width>371</width>
      <height>41</height>
     </rect>
    </property>
@@ -285,7 +285,7 @@
     <rect>
      <x>240</x>
      <y>460</y>
-     <width>311</width>
+     <width>371</width>
      <height>41</height>
     </rect>
    </property>
@@ -390,7 +390,7 @@
     <rect>
      <x>240</x>
      <y>360</y>
-     <width>311</width>
+     <width>371</width>
      <height>41</height>
     </rect>
    </property>
@@ -448,7 +448,7 @@
      <x>630</x>
      <y>160</y>
      <width>481</width>
-     <height>141</height>
+     <height>131</height>
     </rect>
    </property>
    <property name="font">
@@ -470,7 +470,7 @@
    <property name="geometry">
     <rect>
      <x>630</x>
-     <y>380</y>
+     <y>360</y>
      <width>481</width>
      <height>141</height>
     </rect>
@@ -490,58 +490,28 @@
     <number>10</number>
    </property>
   </widget>
-  <widget class="QPushButton" name="mentionsDialogButton">
+  <widget class="QLabel" name="trueValueIndex">
    <property name="geometry">
     <rect>
-     <x>560</x>
-     <y>410</y>
-     <width>51</width>
+     <x>630</x>
+     <y>510</y>
+     <width>481</width>
      <height>41</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <pointsize>16</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="text">
-    <string>...</string>
+    <string>No real datapoint referenced.</string>
    </property>
-  </widget>
-  <widget class="QPushButton" name="hashtagsDialogButton">
-   <property name="geometry">
-    <rect>
-     <x>560</x>
-     <y>460</y>
-     <width>51</width>
-     <height>41</height>
-    </rect>
+   <property name="alignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
-   <property name="font">
-    <font>
-     <pointsize>16</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>...</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="datetimeDialogButton">
-   <property name="geometry">
-    <rect>
-     <x>560</x>
-     <y>360</y>
-     <width>51</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>16</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>...</string>
+   <property name="indent">
+    <number>10</number>
    </property>
   </widget>
  </widget>
