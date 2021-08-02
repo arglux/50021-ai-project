@@ -50,7 +50,8 @@ class Main(qtw.QWidget, Ui_Form):
 			"Timestamp",
 			"Mentions",
 			"Hashtags",
-			"No. of Entities"
+			"No. of Entities",
+			'#Retweets'
 		]
 
 		# load model
@@ -88,7 +89,7 @@ class Main(qtw.QWidget, Ui_Form):
 		self.values = self._read_values()
 
 		# coerce datatypes
-		self.input = 'this' # coerce_datatype( dict(zip(self.headers, self.values)) )
+		self.input = coerce_datatype( dict(zip(self.headers, self.values)) )
 
 		# feed into model
 		predict(self.model, self.input)
@@ -106,7 +107,7 @@ class Main(qtw.QWidget, Ui_Form):
 		datetime = [self.datetimeEdit.text()]
 		mentions = self.mentionsEdit.text().split(' ')
 		hashtags = self.hashtagsEdit.text().split(' ')
-		entitiesCount = [self.entitiesCountEdit.text()]
+		entitiesCount = [int( self.entitiesCountEdit.text() )]
 
 		return([
 		      	numOfFollowers,
@@ -116,7 +117,8 @@ class Main(qtw.QWidget, Ui_Form):
 		      	datetime,
 		      	mentions,
 		      	hashtags,
-		      	entitiesCount
+		      	entitiesCount,
+		      	self.true_value_label
 		      ])
 
 	def _update_values(self, string, label):

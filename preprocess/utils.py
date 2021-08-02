@@ -41,12 +41,14 @@ def sort_counts_by_frequency(counts, total, cutoff=0.2, min_frequency=200):
 	return most_popular_list
 
 def vectorize_using_embedding(values, embedding, size=25):
+	print(values)
 	zero = np.zeros(size)
-	print(embedding.wv[values])
 
 	for val in values:
-		if values in embedding.wv.index_to_key:
+		if val in embedding.wv.index_to_key:
+			# print(embedding.wv[val])
 			zero += embedding.wv[val]
+		else: continue
 
 	return zero
 
