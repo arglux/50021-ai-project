@@ -61,8 +61,8 @@ def coerce_datatype(inp, spread_vector=False):
 	"""
 	# print('raw input:', inp)
 
-	hashtag_embeddings = Word2Vec.load('./data/hashtag_embeddings')
-	mention_embeddings = Word2Vec.load('./data/mention_embeddings')
+	hashtag_embeddings = Word2Vec.load('../data/hashtag_embeddings')
+	mention_embeddings = Word2Vec.load('../data/mention_embeddings')
 
 	out = pd.DataFrame(inp)
 
