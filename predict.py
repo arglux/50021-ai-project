@@ -4,7 +4,7 @@ from gensim.models import Word2Vec
 from preprocess.headers import *
 from preprocess.sentiment import *
 from preprocess.timestamp import *
-from preprocess.utils import vectorize_using_embedding
+from preprocess.utils import *
 
 import torch
 import numpy as np
@@ -22,121 +22,88 @@ def predict(model, inp):
 def coerce_datatype(inp, spread_vector=False):
 	"""
 	Convert app's input to df with following data:
-	clean_headers = [
-		'#Retweets',
-		'Positive',
-		'Negative',
-		'Sentiment Disparity',
-		'Log_#Followers',
-		'Log_#Friends',
-		'Log_No. of Entities',
-		'Log_#Favorites',
-		'Log_Time Int',
-		'Mention Embedding_1',
-		'Mention Embedding_2',
-		'Mention Embedding_3',
-		'Mention Embedding_4',
-		'Mention Embedding_5',
-		'Mention Embedding_6',
-		'Mention Embedding_7',
-		'Mention Embedding_8',
-		'Mention Embedding_9',
-		'Mention Embedding_10',
-		'Mention Embedding_11',
-		'Mention Embedding_12',
-		'Mention Embedding_13',
-		'Mention Embedding_14',
-		'Mention Embedding_15',
-		'Mention Embedding_16',
-		'Mention Embedding_17',
-		'Mention Embedding_18',
-		'Mention Embedding_19',
-		'Mention Embedding_20',
-		'Mention Embedding_21',
-		'Mention Embedding_22',
-		'Mention Embedding_23',
-		'Mention Embedding_24',
-		'Mention Embedding_25',
-		'Hashtag Embedding_1',
-		'Hashtag Embedding_2',
-		'Hashtag Embedding_3',
-		'Hashtag Embedding_4',
-		'Hashtag Embedding_5',
-		'Hashtag Embedding_6',
-		'Hashtag Embedding_7',
-		'Hashtag Embedding_8',
-		'Hashtag Embedding_9',
-		'Hashtag Embedding_10',
-		'Hashtag Embedding_11',
-		'Hashtag Embedding_12',
-		'Hashtag Embedding_13',
-		'Hashtag Embedding_14',
-		'Hashtag Embedding_15',
-		'Hashtag Embedding_16',
-		'Hashtag Embedding_17',
-		'Hashtag Embedding_18',
-		'Hashtag Embedding_19',
-		'Hashtag Embedding_20',
-		'Hashtag Embedding_21',
-		'Hashtag Embedding_22',
-		'Hashtag Embedding_23',
-		'Hashtag Embedding_24',
-		'Hashtag Embedding_25',
-		'1-Hot_Day of Week_1',
-		'1-Hot_Day of Week_2',
-		'1-Hot_Day of Week_3',
-		'1-Hot_Day of Week_4',
-		'1-Hot_Day of Week_5',
-		'1-Hot_Day of Week_6',
-		'1-Hot_Day of Week_7',
+	headers =	[
+			"Tweet Id",
+			"Username",
+			"Timestamp",
+			"#Followers",
+			"#Friends",
+			"#Retweets",
+			"#Favorites",
+			"#Entities",
+			"Sentiment",
+			"Mentions",
+			"Hashtags",
+			"URLs",
+		]
+
+	TO:
+
+	clean_headers = ['Hashtag Emb0', 'Hashtag Emb1', 'Hashtag Emb2', 'Hashtag Emb3',
+		'Hashtag Emb4', 'Hashtag Emb5', 'Hashtag Emb6', 'Hashtag Emb7',
+		'Hashtag Emb8', 'Hashtag Emb9', 'Hashtag Emb10', 'Hashtag Emb11',
+		'Hashtag Emb12', 'Hashtag Emb13', 'Hashtag Emb14', 'Hashtag Emb15',
+		'Hashtag Emb16', 'Hashtag Emb17', 'Hashtag Emb18', 'Hashtag Emb19',
+		'Hashtag Emb20', 'Hashtag Emb21', 'Hashtag Emb22', 'Hashtag Emb23',
+		'Hashtag Emb24', 'Mention Emb0', 'Mention Emb1', 'Mention Emb2',
+		'Mention Emb3', 'Mention Emb4', 'Mention Emb5', 'Mention Emb6',
+		'Mention Emb7', 'Mention Emb8', 'Mention Emb9', 'Mention Emb10',
+		'Mention Emb11', 'Mention Emb12', 'Mention Emb13', 'Mention Emb14',
+		'Mention Emb15', 'Mention Emb16', 'Mention Emb17', 'Mention Emb18',
+		'Mention Emb19', 'Mention Emb20', 'Mention Emb21', 'Mention Emb22',
+		'Mention Emb23', 'Mention Emb24', 'scaled_Positive', 'scaled_Negative',
+		'scaled_Sentiment Disparity', 'log_#Retweets', 'log_#Followers',
+		'log_#Friends', 'log_No. of Entities', 'log_Time Int',
+		'ohe_Day of Week_1', 'ohe_Day of Week_2', 'ohe_Day of Week_3',
+		'ohe_Day of Week_4', 'ohe_Day of Week_5', 'ohe_Day of Week_6',
+		'ohe_Day of Week_7'
 		]
 	"""
-	print('raw input:', inp)
+	# print('raw input:', inp)
 
 	hashtag_embeddings = Word2Vec.load('./data/hashtag_embeddings')
 	mention_embeddings = Word2Vec.load('./data/mention_embeddings')
 
-	inp['Mention Embedding'] = vectorize_using_embedding(list(inp['Mentions']), mention_embeddings)
-	inp['Hashtag Embedding'] = vectorize_using_embedding(list(inp['Hashtags']), hashtag_embeddings)
-	inp.pop('Mentions')
-	inp.pop('Hashtags')
+	out = pd.DataFrame(inp)
 
-	print(inp)
-	for k, v in inp.items():
-		print(k, len(v))
+	# begin transformation
+	day, month, sec = extract_timestamp_features(out, 'Timestamp')
+	out['Day of Week'] = day
+	# out['Month'] = month # dropped because we only have 8 months of data in one of the set
+	out['Time Int'] = sec
 
-	out = pd.DataFrame(inp) # must pass in list for each key's value
+	positive, negative, disparity = extract_sentiment_features(out, 'Sentiment')
+	out['Positive'] = positive
+	out['Negative'] = negative
+	out['Sentiment Disparity'] = disparity
+	out['No. of Entities'] = out['#Entities']
 
+	out = vectorize_and_append(out, 'Hashtags', mention_embeddings, 'Hashtag')
+	out = vectorize_and_append(out, 'Mentions', mention_embeddings, 'Mention')
+
+	for x in ['Tweet Id', 'Timestamp', '#Entities', 'Sentiment', 'Mentions', 'Hashtags', 'URLs']:
+		del out[x]
+
+	out = scaledtransform(out, [("Positive", 5),("Negative", -5), ("Sentiment Disparity", 10)])
+	out = logtransform(out, ["#Retweets", "#Followers", "#Friends", "No. of Entities", "#Favorites", "Time Int"])
+	out = single_ohetransform(out, ["Day of Week"])
+	out = unpackcol(out, ["ohe_Day of Week"])
+
+	out = out.drop(["Username"], 1)
+	out = out.drop(["log_#Favorites"], 1)
+
+	# print(out.columns, len(out.columns))
 	return out
 
-def scaledtransform(dataframe, cols):
-	for col,m in cols:
-		dataframe["scaled_" + col ] = dataframe[col].apply(lambda x: x/m)
-		dataframe = dataframe.drop(col,1)
-	return dataframe
-
-def logtransform(dataframe,cols):
-	for col in cols:
-		dataframe["log_" + col ] = dataframe[col].apply(lambda x: np.log10(int(x)+1))
-		dataframe = dataframe.drop(col,1)
-	return dataframe
-
-def ohetransform(dataframe, cols):
-	for col in cols:
-		one_hot = pd.get_dummies(dataframe[col])
-		dataframe["ohe_" + col ] = one_hot.values.tolist()
-		dataframe = dataframe.drop(col,1)
-	return dataframe
-
-def unpackcol(dataframe,cols):
-	for col in cols:
-		unpacked = pd.DataFrame(df[col].tolist(), columns=[f'{col}_{idx + 1}' for idx in range(len(df[col].values[0]))], index= dataframe.index)
-		dataframe = dataframe.drop(col,axis=1)
-		dataframe = pd.concat([dataframe, unpacked], axis=1, join='inner')
-	return dataframe
-
 if __name__ == '__main__':
-	inp = {'#Followers': [16662], '#Friends': [9595], '#Favorites': [5], 'Sentiment': ['1 -1'], 'Timestamp': ['Sat May 09 09:44:13 +0000 2020'], 'Mentions': ['EmpressEphiya', 'donsummerone', 'CRUCIALQUALITY1', 'ansah_apagya', 'SaddickAdams', 'realDonaldTrump', 'Dela_fishbone', 'newtonlartey6', 'AngelfmAccra', 'Angel961Fm', 'QuamiCopper', 'Nana_Wiser', 'MawukoDoe', 'jeffreyamoah', 'fathyskinny', 'KwameBrooklyn4', 'gazanation_1'], 'Hashtags': ['angelsports', 'angelsports', 'angelsportsaccra', 'angelsports', 'angelsportsaccra', 'angelsports', 'angelsportsaccra', 'angelsports', 'angelsportsaccra', 'angelsports', 'angelsportsaccra', 'angelsports', 'angelsportsaccra', 'angelsports'], 'No. of Entities': [1]}
+	inp = {'Tweet Id': ['1259153416082747392'], 'Username': ['1bf6a0f57c9f08faf3aa804f83539df6'], 'Timestamp': ['Sat May 09 16:09:02 +0000 2020'], '#Followers': [716], '#Friends': [72], '#Retweets': ['13'], '#Favorites': [8], '#Entities': [3], 'Sentiment': ['1 -1'], 'Mentions': ['torghost'], 'Hashtags': ['Tornetwork. Python3. CyberSec bugbounty linux pentest tools infosec Covid_19 COVID19 StayAtHome StayHomeStaySafe'], 'URLs': [0]} # use this
 
 	model_inp = coerce_datatype(inp)
-	print(model_inp)
+
+	model_path = './models'
+	out_size = 1
+	inp_size = len(model_inp.columns)
+	print(inp_size)
+	# model = load_model(model_path, inp_size, out_size)
+
+	# model_out = predict(model, inp)

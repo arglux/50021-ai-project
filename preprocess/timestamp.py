@@ -39,7 +39,7 @@ def extract_timestamp_features(data, col_name):
 		sec.append(str((date - datetime.datetime(2019, 1, 1)).total_seconds())[:-2])
 
 	# simply append the return values to DataFrame > df['col_name'] = pd.Series(...)
-	return day, month, sec
+	return pd.Series(day), pd.Series(month), pd.Series(sec)
 
 if __name__ == '__main__':
 	# Timestamp: Format ( "EEE MMM dd HH:mm:ss Z yyyy" ). ISOString => integer (e.g. 23517957).

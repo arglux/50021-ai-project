@@ -43,15 +43,18 @@ class Main(qtw.QWidget, Ui_Form):
 		self._update_values(self.true_value_label, self.trueValueLabel)
 
 		self.headers = [
+			"Tweet Id",
+			"Username",
+			"Timestamp",
 			"#Followers",
 			"#Friends",
+			"#Retweets",
 			"#Favorites",
+			"#Entities",
 			"Sentiment",
-			"Timestamp",
 			"Mentions",
 			"Hashtags",
-			"No. of Entities",
-			'#Retweets'
+			"URLs",
 		]
 
 		# load model
@@ -64,7 +67,8 @@ class Main(qtw.QWidget, Ui_Form):
 	def randomize(self):
 		index = random.randint(0, len(self.data.index))
 		data_point = self.data.iloc[index]
-		tweet_id = str(data_point['Tweet Id'])
+		self.tweet_id = str(data_point['Tweet Id'])
+		self.username = str(data_point['Username'])
 
 		# now = str(datetime.now().strftime('%a %b %d %H:%M:%S +0000 %Y')) # EEE MMM dd HH:mm:ss Z yyyy
 
@@ -80,7 +84,7 @@ class Main(qtw.QWidget, Ui_Form):
 
 		self.entitiesCountEdit.setText( str(len(data_point['Entities'].split(' '))) )
 
-		self.trueValueIndex.setText(f'Data referenced. Index: {index}. Tweet Id: {tweet_id}.')
+		self.trueValueIndex.setText(f'Data referenced. Index: {index}. Tweet Id: {self.tweet_id}.')
 		self.true_value_label = str(data_point['#Retweets'])
 		self._update_values(self.true_value_label, self.trueValueLabel)
 
@@ -100,25 +104,28 @@ class Main(qtw.QWidget, Ui_Form):
 
 	def _read_values(self):
 		# all values are read as list to standardize (easier to turn into DataFrame also)
-		numOfFollowers = [int( self.numOfFollowersEdit.text() )]
-		numOfFriends = [int(  self.numOfFriendsEdit.text() )]
-		numOfFavorites = [int( self.numOfFavoritesEdit.text() )]
-		sentiment = [self.sentimentEdit.text()]
-		datetime = [self.datetimeEdit.text()]
-		mentions = self.mentionsEdit.text().split(' ')
-		hashtags = self.hashtagsEdit.text().split(' ')
-		entitiesCount = [int( self.entitiesCountEdit.text() )]
+		numOfFollowers = int(self.numOfFollowersEdit.text())
+		numOfFriends = int(self.numOfFriendsEdit.text())
+		numOfFavorites = int(self.numOfFavoritesEdit.text())
+		sentiment = self.sentimentEdit.text()
+		datetime = self.datetimeEdit.text()
+		mentions = self.mentionsEdit.text()
+		hashtags = self.hashtagsEdit.text()
+		entitiesCount = int(self.entitiesCountEdit.text())
 
 		return([
-		      	numOfFollowers,
-		      	numOfFriends,
-		      	numOfFavorites,
-		      	sentiment,
-		      	datetime,
-		      	mentions,
-		      	hashtags,
-		      	entitiesCount,
-		      	self.true_value_label
+		       	[self.tweet_id],
+		       	[self.username],
+		       	[datetime],
+		      	[numOfFollowers],
+		      	[numOfFriends],
+		      	[self.true_value_label], # #Retweets
+		      	[numOfFavorites],
+		      	[entitiesCount],
+		      	[sentiment],
+		      	[mentions],
+		      	[hashtags],
+		      	[0], # URLs
 		      ])
 
 	def _update_values(self, string, label):

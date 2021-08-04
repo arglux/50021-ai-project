@@ -6,7 +6,7 @@ def extract_sentiment_features(data, col_name):
 	disparity = [ int(x.split(' ')[0]) - int(x.split(' ')[1]) for x in data[col_name] ]
 
 	# simply append the return values  to DataFrame > df['col_name'] = pd.Series(...)
-	return positive, negative, disparity
+	return pd.Series(positive), pd.Series(negative), pd.Series(disparity)
 
 if __name__ == '__main__':
 	from headers import *
