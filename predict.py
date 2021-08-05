@@ -1,25 +1,39 @@
-from model import Net
+from model import LinReg2
 from gensim.models import Word2Vec
 
 from preprocess.headers import *
 from preprocess.sentiment import *
 from preprocess.timestamp import *
 from preprocess.utils import *
+from dataset import CreateDataset
 
+import math
 import torch
 import numpy as np
 import pandas as pd
 
-def load_model(model_path, inp_size, out_size, device='cpu'):
-	trained_model = Net(inp_size, out_size).to(device) # reinitialize model
+from torch.autograd import Variable
+from torch.utils.data import DataLoader
+
+def load_model(model_path, inp_size, hidden_size, out_size, device='cpu'):
+	trained_model = LinReg2(inp_size, hidden_size, out_size).to(device) # reinitialize model
 	trained_model.load_state_dict(torch.load(model_path))
 	trained_model.eval()
 	return trained_model
 
-def predict(model, inp):
-	print(model, inp)
+def predict(model, dataloader, convert=True):
+	# print(model, dataloader)
+	result = []
+	for _X, _y in dataloader:
+		_X = Variable(_X).float()
+		_y = Variable(_y).float()
 
-def coerce_datatype(inp, spread_vector=False):
+		pred = model(_X)
+
+		if convert: return (math.floor(10**_y-1), math.floor(10**pred.item()-1))
+		else: return (_y, pred)
+
+def coerce_datatype(inp, mention_embeddings, hashtag_embeddings):
 	"""
 	Convert app's input to df with following data:
 	headers =	[
@@ -38,7 +52,7 @@ def coerce_datatype(inp, spread_vector=False):
 		]
 
 	TO:
-
+	(in the form of dataloader of batch 32)
 	clean_headers = ['Hashtag Emb0', 'Hashtag Emb1', 'Hashtag Emb2', 'Hashtag Emb3',
 		'Hashtag Emb4', 'Hashtag Emb5', 'Hashtag Emb6', 'Hashtag Emb7',
 		'Hashtag Emb8', 'Hashtag Emb9', 'Hashtag Emb10', 'Hashtag Emb11',
@@ -61,12 +75,9 @@ def coerce_datatype(inp, spread_vector=False):
 	"""
 	# print('raw input:', inp)
 
-	hashtag_embeddings = Word2Vec.load('../data/hashtag_embeddings')
-	mention_embeddings = Word2Vec.load('../data/mention_embeddings')
-
 	out = pd.DataFrame(inp)
 
-	# begin transformation
+	# begin in-place transformation of different columns
 	day, month, sec = extract_timestamp_features(out, 'Timestamp')
 	out['Day of Week'] = day
 	# out['Month'] = month # dropped because we only have 8 months of data in one of the set
@@ -90,20 +101,26 @@ def coerce_datatype(inp, spread_vector=False):
 	out = unpackcol(out, ["ohe_Day of Week"])
 
 	out = out.drop(["Username"], 1)
-	out = out.drop(["log_#Favorites"], 1)
+	# out = out.drop(["log_#Retweets"], 1)
+
+	dataset = CreateDataset(out, fmt="df")
+	dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
 	# print(out.columns, len(out.columns))
-	return out
+	return dataloader
 
 if __name__ == '__main__':
-	inp = {'Tweet Id': ['1259153416082747392'], 'Username': ['1bf6a0f57c9f08faf3aa804f83539df6'], 'Timestamp': ['Sat May 09 16:09:02 +0000 2020'], '#Followers': [716], '#Friends': [72], '#Retweets': ['13'], '#Favorites': [8], '#Entities': [3], 'Sentiment': ['1 -1'], 'Mentions': ['torghost'], 'Hashtags': ['Tornetwork. Python3. CyberSec bugbounty linux pentest tools infosec Covid_19 COVID19 StayAtHome StayHomeStaySafe'], 'URLs': [0]} # use this
+	inp = {'Tweet Id': ['1259153416082747392'], 'Username': ['1bf6a0f57c9f08faf3aa804f83539df6'], 'Timestamp': ['Sat May 09 16:09:02 +0000 2020'], '#Followers': [716], '#Friends': [72], '#Retweets': ['13'], '#Favorites': [8], '#Entities': [3], 'Sentiment': ['1 -1'], 'Mentions': ['torghost'], 'Hashtags': ['Tornetwork. Python3. CyberSec bugbounty linux pentest tools infosec Covid_19 COVID19 StayAtHome StayHomeStaySafe'], 'URLs': [0]} # example of app's parsed input
 
-	model_inp = coerce_datatype(inp)
+	hashtag_embeddings = Word2Vec.load('./data/hashtag_embeddings')
+	mention_embeddings = Word2Vec.load('./data/mention_embeddings')
+	model_inp = coerce_datatype(inp, mention_embeddings, hashtag_embeddings)
 
-	model_path = './models'
+	model_path = './models/65InpLinReg-0408-2107'
 	out_size = 1
-	inp_size = len(model_inp.columns)
-	print(inp_size)
-	# model = load_model(model_path, inp_size, out_size)
+	hidden_size = 32
+	inp_size = 65 # "log_#Retweets" will be dropped when creating dataset hence 66 - 1 = 65
+	model = load_model(model_path, inp_size, hidden_size, out_size)
 
-	# model_out = predict(model, inp)
+	model_out = predict(model, model_inp)
+	print(model_out) # (true, pred)

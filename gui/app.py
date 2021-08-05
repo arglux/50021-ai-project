@@ -5,7 +5,9 @@ sys.path.append("../") # to access predict.py
 
 from predict import *
 from preprocess.headers import headers
+
 from datetime import datetime
+from gensim.models import Word2Vec
 
 from PyQt5 import QtCore as qtc
 from PyQt5 import QtWidgets as qtw
@@ -33,6 +35,8 @@ class Main(qtw.QWidget, Ui_Form):
 
 		print("Loading... This may take a while (~3 mins) depending on test set size...") # line below
 		self.data = pd.read_csv("../data/TweetsCOV19_052020.tsv.gz", compression='gzip', names=headers, sep='\t', quotechar='"')
+		self.hashtag_embeddings = Word2Vec.load('../data/hashtag_embeddings')
+		self.mention_embeddings = Word2Vec.load('../data/mention_embeddings')
 
 		# attach button to function
 		self.randomizeButton.clicked.connect(self.randomize)
@@ -58,11 +62,11 @@ class Main(qtw.QWidget, Ui_Form):
 		]
 
 		# load model
-		model_path = '../models/dummy-model-2706-2356'
-		inp_size = 49
+		model_path = '../models/65InpLinReg-0408-2107'
 		out_size = 1
-		device = 'cpu'
-		self.model = load_model(model_path, inp_size, out_size)
+		hidden_size = 32
+		inp_size = 65 # "log_#Retweets" will be dropped when creating dataset hence 66 - 1 = 65
+		self.model = load_model(model_path, inp_size, hidden_size, out_size)
 
 	def randomize(self):
 		index = random.randint(0, len(self.data.index))
@@ -93,13 +97,14 @@ class Main(qtw.QWidget, Ui_Form):
 		self.values = self._read_values()
 
 		# coerce datatypes
-		self.input = coerce_datatype( dict(zip(self.headers, self.values)) )
+		self.input = coerce_datatype( dict(zip(self.headers, self.values)), self.mention_embeddings, self.hashtag_embeddings )
 
 		# feed into model
-		predict(self.model, self.input)
+		model_out = predict(self.model, self.input) # [(true, pred)]
+		print(f"True value: {model_out[0]}. Prediction: {model_out[1]}.")
 
 		# show result
-		self.prediction_value_label = str(random.randint(0, 1000))
+		self.prediction_value_label = str( model_out[1] )
 		self._update_values(self.prediction_value_label, self.predictionValueLabel)
 
 	def _read_values(self):
@@ -130,7 +135,7 @@ class Main(qtw.QWidget, Ui_Form):
 
 	def _update_values(self, string, label):
 		label.setText(string)
-		print(f"{label} set to {string}")
+		# print(f"{label} set to {string}")
 
 	def center_window(self):
 		"""
