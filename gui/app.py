@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets as qtw
 from PyQt5 import QtGui as qtg
 
 from main_window import Ui_Form
-from PIL import Image
 
 class Main(qtw.QWidget, Ui_Form):
 	"""
