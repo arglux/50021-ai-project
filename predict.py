@@ -17,7 +17,7 @@ from torch.utils.data import DataLoader
 
 def load_model(model_path, inp_size, hidden_size, out_size, device='cpu'):
 	trained_model = LinReg2(inp_size, hidden_size, out_size).to(device) # reinitialize model
-	trained_model.load_state_dict(torch.load(model_path))
+	trained_model.load_state_dict(torch.load(model_path, map_location=torch.device(device)))
 	trained_model.eval()
 	return trained_model
 

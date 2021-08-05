@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets as qtw
 from PyQt5 import QtGui as qtg
 
 from main_window import Ui_Form
-from PIL import Image
 
 class Main(qtw.QWidget, Ui_Form):
 	"""
@@ -31,6 +30,7 @@ class Main(qtw.QWidget, Ui_Form):
 		# state values
 		self.prediction_value_label = "-"
 		self.true_value_label = "-"
+		self.value_selected_randomly_from_dataset = False
 		self.values = []
 
 		print("Loading... This may take a while (~3 mins) depending on test set size...") # line below
@@ -41,6 +41,16 @@ class Main(qtw.QWidget, Ui_Form):
 		# attach button to function
 		self.randomizeButton.clicked.connect(self.randomize)
 		self.predictButton.clicked.connect(self.predict)
+
+		# attach listeners
+		self.numOfFollowersEdit.textChanged[str].connect(self.check_if_custom_values)
+		self.numOfFriendsEdit.textChanged[str].connect(self.check_if_custom_values)
+		self.numOfFavoritesEdit.textChanged[str].connect(self.check_if_custom_values)
+		self.sentimentEdit.textChanged[str].connect(self.check_if_custom_values)
+		self.datetimeEdit.textChanged[str].connect(self.check_if_custom_values)
+		self.mentionsEdit.textChanged[str].connect(self.check_if_custom_values)
+		self.hashtagsEdit.textChanged[str].connect(self.check_if_custom_values)
+		self.entitiesCountEdit.textChanged[str].connect(self.check_if_custom_values)
 
 		# setup
 		self._update_values(self.prediction_value_label, self.predictionValueLabel)
@@ -69,13 +79,14 @@ class Main(qtw.QWidget, Ui_Form):
 		self.model = load_model(model_path, inp_size, hidden_size, out_size)
 
 	def randomize(self):
+		self.value_selected_randomly_from_dataset = True
 		index = random.randint(0, len(self.data.index))
 		data_point = self.data.iloc[index]
 		self.tweet_id = str(data_point['Tweet Id'])
 		self.username = str(data_point['Username'])
 
 		# now = str(datetime.now().strftime('%a %b %d %H:%M:%S +0000 %Y')) # EEE MMM dd HH:mm:ss Z yyyy
-
+		# set texts into various line edits and labels
 		self.numOfFollowersEdit.setText( str(data_point['#Followers']) )
 		self.numOfFriendsEdit.setText( str(data_point['#Friends']) )
 		self.numOfFavoritesEdit.setText( str(data_point['#Favorites']) )
@@ -87,10 +98,19 @@ class Main(qtw.QWidget, Ui_Form):
 		self.hashtagsEdit.setText( str(data_point['Hashtags']) )
 
 		self.entitiesCountEdit.setText( str(len(data_point['Entities'].split(' '))) )
+		self.value_selected_randomly_from_dataset = False
 
 		self.trueValueIndex.setText(f'Data referenced. Index: {index}. Tweet Id: {self.tweet_id}.')
 		self.true_value_label = str(data_point['#Retweets'])
 		self._update_values(self.true_value_label, self.trueValueLabel)
+
+	def check_if_custom_values(self):
+		if self.value_selected_randomly_from_dataset: return
+
+		# reset true label to 0 because no real data referenced. this is custom data
+		self.trueValueIndex.setText(f'No real data referenced. You are entering custom data.')
+		self.true_value_label = 0
+		self._update_values("-", self.trueValueLabel)
 
 	def predict(self):
 		# read values
@@ -100,7 +120,7 @@ class Main(qtw.QWidget, Ui_Form):
 		self.input = coerce_datatype( dict(zip(self.headers, self.values)), self.mention_embeddings, self.hashtag_embeddings )
 
 		# feed into model
-		model_out = predict(self.model, self.input) # [(true, pred)]
+		model_out = predict(self.model, self.input) # (true, pred)
 		print(f"True value: {model_out[0]}. Prediction: {model_out[1]}.")
 
 		# show result
