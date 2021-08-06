@@ -30,10 +30,11 @@ def predict(model, dataloader, convert=True):
 
 		pred = model(_X)
 
+		# print(pred.item())
 		if convert: return (math.floor(10**_y-1), math.floor(10**pred.item()-1))
 		else: return (_y, pred)
 
-def coerce_datatype(inp, mention_embeddings, hashtag_embeddings):
+def coerce_datatype(inp, mention_embeddings, hashtag_embeddings, lookup_user=None):
 	"""
 	Convert app's input to df with following data:
 	headers =	[
@@ -54,23 +55,26 @@ def coerce_datatype(inp, mention_embeddings, hashtag_embeddings):
 	TO:
 	(in the form of dataloader of batch 32)
 	clean_headers = ['Hashtag Emb0', 'Hashtag Emb1', 'Hashtag Emb2', 'Hashtag Emb3',
-		'Hashtag Emb4', 'Hashtag Emb5', 'Hashtag Emb6', 'Hashtag Emb7',
-		'Hashtag Emb8', 'Hashtag Emb9', 'Hashtag Emb10', 'Hashtag Emb11',
-		'Hashtag Emb12', 'Hashtag Emb13', 'Hashtag Emb14', 'Hashtag Emb15',
-		'Hashtag Emb16', 'Hashtag Emb17', 'Hashtag Emb18', 'Hashtag Emb19',
-		'Hashtag Emb20', 'Hashtag Emb21', 'Hashtag Emb22', 'Hashtag Emb23',
-		'Hashtag Emb24', 'Mention Emb0', 'Mention Emb1', 'Mention Emb2',
-		'Mention Emb3', 'Mention Emb4', 'Mention Emb5', 'Mention Emb6',
-		'Mention Emb7', 'Mention Emb8', 'Mention Emb9', 'Mention Emb10',
-		'Mention Emb11', 'Mention Emb12', 'Mention Emb13', 'Mention Emb14',
-		'Mention Emb15', 'Mention Emb16', 'Mention Emb17', 'Mention Emb18',
-		'Mention Emb19', 'Mention Emb20', 'Mention Emb21', 'Mention Emb22',
-		'Mention Emb23', 'Mention Emb24', 'scaled_Positive', 'scaled_Negative',
-		'scaled_Sentiment Disparity', 'log_#Retweets', 'log_#Followers',
-		'log_#Friends', 'log_No. of Entities', 'log_Time Int',
-		'ohe_Day of Week_1', 'ohe_Day of Week_2', 'ohe_Day of Week_3',
-		'ohe_Day of Week_4', 'ohe_Day of Week_5', 'ohe_Day of Week_6',
-		'ohe_Day of Week_7'
+       'Hashtag Emb4', 'Hashtag Emb5', 'Hashtag Emb6', 'Hashtag Emb7',
+       'Hashtag Emb8', 'Hashtag Emb9', 'Hashtag Emb10', 'Hashtag Emb11',
+       'Hashtag Emb12', 'Hashtag Emb13', 'Hashtag Emb14', 'Hashtag Emb15',
+       'Hashtag Emb16', 'Hashtag Emb17', 'Hashtag Emb18', 'Hashtag Emb19',
+       'Hashtag Emb20', 'Hashtag Emb21', 'Hashtag Emb22', 'Hashtag Emb23',
+       'Hashtag Emb24', 'Mention Emb0', 'Mention Emb1', 'Mention Emb2',
+       'Mention Emb3', 'Mention Emb4', 'Mention Emb5', 'Mention Emb6',
+       'Mention Emb7', 'Mention Emb8', 'Mention Emb9', 'Mention Emb10',
+       'Mention Emb11', 'Mention Emb12', 'Mention Emb13', 'Mention Emb14',
+       'Mention Emb15', 'Mention Emb16', 'Mention Emb17', 'Mention Emb18',
+       'Mention Emb19', 'Mention Emb20', 'Mention Emb21', 'Mention Emb22',
+       'Mention Emb23', 'Mention Emb24', 'scaled_Positive', 'scaled_Negative',
+       'scaled_Sentiment Disparity', 'log_#Followers', 'log_#Friends',
+       'log_No. of Entities', 'log_#Favorites', 'log_Time Int',
+       'ohe_Day of Week_1', 'ohe_Day of Week_2', 'ohe_Day of Week_3',
+       'ohe_Day of Week_4', 'ohe_Day of Week_5', 'ohe_Day of Week_6',
+       'ohe_Day of Week_7', '#Followers_min', '#Friends_min', '#Retweets_min',
+       '#Favorites_min', '#Followers_max', '#Friends_max', '#Retweets_max',
+       '#Favorites_max', '#Followers_mean', '#Friends_mean', '#Retweets_mean',
+       '#Favorites_mean', 'label'
 		]
 	"""
 	# print('raw input:', inp)
@@ -95,18 +99,15 @@ def coerce_datatype(inp, mention_embeddings, hashtag_embeddings):
 	for x in ['Tweet Id', 'Timestamp', '#Entities', 'Sentiment', 'Mentions', 'Hashtags', 'URLs']:
 		del out[x]
 
-	out = scaledtransform(out, [("Positive", 5),("Negative", -5), ("Sentiment Disparity", 10)])
+	out = scaledtransform(out, [("Positive", 5), ("Negative", -5), ("Sentiment Disparity", 10)])
 	out = logtransform(out, ["#Retweets", "#Followers", "#Friends", "No. of Entities", "#Favorites", "Time Int"])
 	out = single_ohetransform(out, ["Day of Week"])
 	out = unpackcol(out, ["ohe_Day of Week"])
 
-	out = out.drop(["Username"], 1)
-	# out = out.drop(["log_#Retweets"], 1)
-
-	dataset = CreateDataset(out, fmt="df")
+	dataset = CreateDataset(out, protocol="df", lookup_path=lookup_user)
 	dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-
 	# print(out.columns, len(out.columns))
+
 	return dataloader
 
 if __name__ == '__main__':
@@ -114,13 +115,15 @@ if __name__ == '__main__':
 
 	hashtag_embeddings = Word2Vec.load('./data/hashtag_embeddings')
 	mention_embeddings = Word2Vec.load('./data/mention_embeddings')
-	model_inp = coerce_datatype(inp, mention_embeddings, hashtag_embeddings)
 
-	model_path = './models/65InpLinReg-0408-2107'
+	lookup_user = pd.read_csv("./data/TweetsCOV19_052020.tsv.gz", compression='gzip', names=headers, sep='\t', quotechar='"')
+	model_inp = coerce_datatype(inp, mention_embeddings, hashtag_embeddings, lookup_user=lookup_user)
+
+	model_path = './models/78InpLinReg-0508-1614'
 	out_size = 1
 	hidden_size = 32
-	inp_size = 65 # "log_#Retweets" will be dropped when creating dataset hence 66 - 1 = 65
+	inp_size = 78
 	model = load_model(model_path, inp_size, hidden_size, out_size)
 
 	model_out = predict(model, model_inp)
-	print(model_out) # (true, pred)
+	print(f"With user lookup table: {model_out}") # (true, pred)
