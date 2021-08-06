@@ -1,6 +1,7 @@
 from dataset import CreateDataset
 from model import LinReg2
 from save import save
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -19,6 +20,7 @@ class RMSLELoss(nn.Module):
 		return torch.sqrt(self.mse(torch.log(pred + 1), torch.log(actual + 1)))
 
 def train(model, dataloader, criterion, optimizer, num_epochs=50):
+	mbls = []
 	for e in range(num_epochs+1):
 		batch_losses = []
 		for i, (Xb, yb) in enumerate(dataloader):
@@ -34,16 +36,18 @@ def train(model, dataloader, criterion, optimizer, num_epochs=50):
 
 		mbl = np.mean(np.sqrt(batch_losses)).round(3)
 
-		if e % 1 == 0: print("Epoch [{}/{}], Batch loss: {}".format(e, num_epochs, mbl))
+		if e % 1 == 0:
+			print("Epoch [{}/{}], Batch loss: {}".format(e, num_epochs, mbl))
+			mbls.append(mbl)
 
-	return batch_losses
+	return mbls
 
 if __name__ == "__main__":
 	input_size = 77
 	hidden_size = 32
 	output_size = 1
 	learning_rate = 0.001
-	num_epochs = 5
+	num_epochs = 15
 
 	model = LinReg2(input_size, hidden_size, output_size)
 	criterion = RMSLELoss()
@@ -53,12 +57,14 @@ if __name__ == "__main__":
 		model.cuda()
 		print(model, criterion, optimizer)
 
-	dataset = CreateDataset("./data/77test.pkl", protocol="pickle")
+	dataset = CreateDataset("./data/77train.pkl", protocol="pickle")
 	train_dl = DataLoader(dataset, batch_size=32, shuffle=True)
 
 	losses = train(model, train_dl, criterion, optimizer, num_epochs)
 	save(model, '77InpLinReg')
 
-	textfile = open("./data/train_loss.txt", "w")
+	now = datetime.now()
+	timestamp = now.strftime("%d%m-%H%M")
+	textfile = open(f"./data/train_loss_{timestamp}.txt", "w")
 	for loss in losses: textfile.write(str(loss) + "\n")
 

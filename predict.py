@@ -31,7 +31,7 @@ def predict(model, dataloader, convert=True):
 		pred = model(_X)
 
 		# print(pred.item())
-		if convert: return (math.floor(10**_y-1), math.floor(10**pred.item()-1))
+		if convert: return (math.floor(10**_y-1), max(0, math.floor(10**pred.item()-1)))
 		else: return (_y, pred)
 
 def coerce_datatype(inp, mention_embeddings, hashtag_embeddings, lookup_user=None):

@@ -1,52 +1,57 @@
 from model import LinReg2
 from train import RMSLELoss
+from predict import load_model
+from dataset import CreateDataset
+from datetime import datetime
 
+from torch.autograd import Variable
 from torch.utils.data import DataLoader
 
+import math
 import torch
+import numpy as np
 import pandas as pd
 
-def train(model, dataloader):
-	model.eval()
-	for _X, _y in test_dl:
-		test_batch_losses = []
+def test(model, dataloader, criterion, optimizer):
+	accs = []
+	losses = []
+	for _X, _y in dataloader:
 		_X = Variable(_X).cuda().float()
 		_y = Variable(_y).cuda().float()
 
-		#apply model
 		test_preds = model(_X)
 		test_loss = criterion(test_preds, _y)
 
-		for i in range(100):
-			print(math.floor(10**_y[i]-1),math.floor(10**test_preds[i].item()-1))
-		break
+		losses.append(test_loss.item())
+		accs.append(magnitude_diff(math.floor(10**_y-1), max(0, math.floor(10**test_preds.item()-1))))
 
-	# print(model, dataloader)
-	result = []
-	for _X, _y in dataloader:
-		_X = Variable(_X).float()
-		_y = Variable(_y).float()
+	return losses, accs
 
-		pred = model(_X)
-
-		# print(pred.item())
-		if convert: return (math.floor(10**_y-1), math.floor(10**pred.item()-1))
-		else: return (_y, pred)
+def magnitude_diff(y, pred):
+	return (np.log10(abs(y - pred) + 1))
 
 if __name__ == '__main__':
-	print("OK")
-	# inp_size = 49
-	# out_size = 1
-	# device = 'cpu'
+	model_path = './models/77InpLinReg-0608-1746'
+	out_size = 1
+	hidden_size = 32
+	inp_size = 77
+	learning_rate = 0.001
 
-	# trained_model = Net(inp_size, out_size).to(device) # reinitialize model
-	# trained_model.load_state_dict(torch.load('./models/dummy-model-2706-2356'))
-	# trained_model.eval()
+	model = load_model(model_path, inp_size, hidden_size, out_size, device='cuda')
+	criterion = RMSLELoss()
+	optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
-	# test_data = pd.read_csv('./data/herremans_hit_1030test.csv')
-	# print(f"Data loaded. Train data shape: {test_data.shape}")
+	dataset = CreateDataset("./data/77test.pkl", protocol="pickle")
+	test_dl = DataLoader(dataset, batch_size=1, shuffle=False)
 
-	# x = torch.FloatTensor(test_data.loc[:, test_data.columns != 'Topclass1030'].values).to(device)
-	# y = torch.FloatTensor(test_data['Topclass1030']).to(device)
+	print("Running test...")
+	losses, accs = test(model, test_dl, criterion, optimizer)
 
-	# sensitivity_evaluation(trained_model, x, y)
+	now = datetime.now()
+	timestamp = now.strftime("%d%m-%H%M")
+	textfile = open(f"./data/test_loss_{timestamp}.txt", "w")
+	for loss in losses: textfile.write(str(loss) + "\n")
+
+	textfile = open(f"./data/accuracy_{timestamp}.txt", "w")
+	for acc in accs: textfile.write(str(acc) + "\n")
+
