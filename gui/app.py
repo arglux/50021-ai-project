@@ -74,10 +74,10 @@ class Main(qtw.QWidget, Ui_Form):
 		]
 
 		# load model
-		model_path = '../models/78InpLinReg-0508-1614'
+		model_path = '../models/77InpLinReg-0608-1746'
 		out_size = 1
 		hidden_size = 32
-		inp_size = 78 # "log_#Retweets" will be dropped when creating dataset hence 66 - 1 = 65
+		inp_size = 77
 		self.model = load_model(model_path, inp_size, hidden_size, out_size)
 
 	def randomize(self):

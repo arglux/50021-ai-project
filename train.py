@@ -1,10 +1,14 @@
-from model import Net, LinReg2
+from dataset import CreateDataset
+from model import LinReg2
 from save import save
 
+import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 
-import pandas as pd
+from torch.autograd import Variable
+from torch.utils.data import DataLoader
 
 class RMSLELoss(nn.Module):
 	def __init__(self):
@@ -14,10 +18,10 @@ class RMSLELoss(nn.Module):
 	def forward(self, pred, actual):
 		return torch.sqrt(self.mse(torch.log(pred + 1), torch.log(actual + 1)))
 
-def train(train_data, model, num_epochs):
-	for e in range(num_epochs):
+def train(model, dataloader, criterion, optimizer, num_epochs=50):
+	for e in range(num_epochs+1):
 		batch_losses = []
-		for i, (Xb, yb) in enumerate(train_data, model):
+		for i, (Xb, yb) in enumerate(dataloader):
 			_X = Variable(Xb).cuda().float()
 			_y = Variable(yb).cuda().float()
 			preds = model(_X)
@@ -30,29 +34,16 @@ def train(train_data, model, num_epochs):
 
 		mbl = np.mean(np.sqrt(batch_losses)).round(3)
 
-		if e % 5 == 0: print("Epoch [{}/{}], Batch loss: {}".format(e, num_epochs, mbl))
+		if e % 1 == 0: print("Epoch [{}/{}], Batch loss: {}".format(e, num_epochs, mbl))
 
-def train_dummy(x, y, model, loss_function, optimizer, device, epochs=1000+1):
-	for epoch in range(epochs):
-		features = x.to(device)
-		target = y.to(device)
-
-		optimizer.zero_grad()
-
-		prediction = model(features)
-		loss = loss_function(prediction, target.view(-1, 1)).to(device)
-		loss.backward()
-		optimizer.step()
-
-		if epoch % 50 == 0: # print every 50 epochs
-		    print (f"Epoch: {epoch}, Loss: {loss}")
+	return batch_losses
 
 if __name__ == "__main__":
-	input_size = 65
-	hidden_size = 10
+	input_size = 77
+	hidden_size = 32
 	output_size = 1
-	learning_rate = 0.01
-	num_epochs = 50
+	learning_rate = 0.001
+	num_epochs = 5
 
 	model = LinReg2(input_size, hidden_size, output_size)
 	criterion = RMSLELoss()
@@ -62,16 +53,12 @@ if __name__ == "__main__":
 		model.cuda()
 		print(model, criterion, optimizer)
 
-	# model = Net(inp_size, out_size).to(device)
-	# loss_function = nn.BCELoss()
-	# optimizer = torch.optim.Adam(model.parameters(), lr=lr_rate)
+	dataset = CreateDataset("./data/77test.pkl", protocol="pickle")
+	train_dl = DataLoader(dataset, batch_size=32, shuffle=True)
 
-	# # assuming the data is downloaded and saved in the same dir -> ./content
-	# train_data = pd.read_csv('./data/herremans_hit_1030training.csv')
-	# print(f"Data loaded. Train data shape: {train_data.shape}")
+	losses = train(model, train_dl, criterion, optimizer, num_epochs)
+	save(model, '77InpLinReg')
 
-	# x = torch.FloatTensor(train_data.loc[:, train_data.columns != 'Topclass1030'].values).to(device)
-	# y = torch.FloatTensor(train_data['Topclass1030']).to(device)
+	textfile = open("./data/train_loss.txt", "w")
+	for loss in losses: textfile.write(str(loss) + "\n")
 
-	# train(x, y, model, loss_function, optimizer, device)
-	# save(model, 'dummy-model')

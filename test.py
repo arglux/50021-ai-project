@@ -1,10 +1,12 @@
-from model import Net, LinReg2
+from model import LinReg2
+from train import RMSLELoss
+
+from torch.utils.data import DataLoader
 
 import torch
 import pandas as pd
 
-
-def train(train_data, model):
+def train(model, dataloader):
 	model.eval()
 	for _X, _y in test_dl:
 		test_batch_losses = []
@@ -15,35 +17,21 @@ def train(train_data, model):
 		test_preds = model(_X)
 		test_loss = criterion(test_preds, _y)
 
-		for i in range(100): print(math.floor(10**_y[i]-1),math.floor(10**test_preds[i].item()-1))
+		for i in range(100):
+			print(math.floor(10**_y[i]-1),math.floor(10**test_preds[i].item()-1))
 		break
 
-def sensitivity_evaluation(model, test_data, test_label, device='cpu'):
-	TP = 0
-	TN = 0
-	FN = 0
-	FP = 0
+	# print(model, dataloader)
+	result = []
+	for _X, _y in dataloader:
+		_X = Variable(_X).float()
+		_y = Variable(_y).float()
 
-	for i in range(0, test_data.size()[0]):
-		# print(test_data[i].size())
-		Xtest = torch.Tensor(test_data[i]).to(device)
-		y_hat = model(Xtest)
+		pred = model(_X)
 
-		if y_hat > 0.5: prediction = 1
-		else: prediction = 0
-
-		if (prediction == test_label[i]):
-			if (prediction == 1): TP += 1
-			else: TN += 1
-
-		else:
-			if (prediction == 1): FP += 1
-			else: FN += 1
-
-	print("True Positives: {0}, True Negatives: {1}".format(TP, TN))
-	print("False Positives: {0}, False Negatives: {1}".format(FP, FN))
-	rate = TP/(FN+TP)
-	print("Class specific accuracy of correctly predicting a hit song is {0}".format(rate))
+		# print(pred.item())
+		if convert: return (math.floor(10**_y-1), math.floor(10**pred.item()-1))
+		else: return (_y, pred)
 
 if __name__ == '__main__':
 	print("OK")

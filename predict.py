@@ -119,10 +119,10 @@ if __name__ == '__main__':
 	lookup_user = pd.read_csv("./data/TweetsCOV19_052020.tsv.gz", compression='gzip', names=headers, sep='\t', quotechar='"')
 	model_inp = coerce_datatype(inp, mention_embeddings, hashtag_embeddings, lookup_user=lookup_user)
 
-	model_path = './models/78InpLinReg-0508-1614'
+	model_path = './models/77InpLinReg-0608-1746'
 	out_size = 1
 	hidden_size = 32
-	inp_size = 78
+	inp_size = 77
 	model = load_model(model_path, inp_size, hidden_size, out_size)
 
 	model_out = predict(model, model_inp)

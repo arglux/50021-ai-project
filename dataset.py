@@ -36,7 +36,7 @@ class CreateDataset(Dataset):
 				data = data.merge(lookup, how='inner', on='Username')
 
 		self.y = torch.from_numpy(data[['log_#Retweets']].values)
-		data['label'] = data['log_#Retweets'].apply(lambda x: float(0) if x==float(0) else float(1))
+		# data['label'] = data['log_#Retweets'].apply(lambda x: float(0) if x==float(0) else float(1))
 		data = data.drop(["log_#Retweets", "Username"], 1)
 		self.X = torch.from_numpy(data.values)
 		# print(data.columns, len(data.columns))
