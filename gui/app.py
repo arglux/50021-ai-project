@@ -1,5 +1,6 @@
 import sys
 import random
+import pickle5 as pickle
 
 sys.path.append("../") # to access predict.py
 
@@ -35,6 +36,7 @@ class Main(qtw.QWidget, Ui_Form):
 
 		print("Loading... This may take a while (~3 mins) depending on test set size...") # line below
 		self.data = pd.read_csv("../data/TweetsCOV19_052020.tsv.gz", compression='gzip', names=headers, sep='\t', quotechar='"')
+
 		self.hashtag_embeddings = Word2Vec.load('../data/hashtag_embeddings')
 		self.mention_embeddings = Word2Vec.load('../data/mention_embeddings')
 
@@ -72,10 +74,10 @@ class Main(qtw.QWidget, Ui_Form):
 		]
 
 		# load model
-		model_path = '../models/65InpLinReg-0408-2107'
+		model_path = '../models/78InpLinReg-0508-1614'
 		out_size = 1
 		hidden_size = 32
-		inp_size = 65 # "log_#Retweets" will be dropped when creating dataset hence 66 - 1 = 65
+		inp_size = 78 # "log_#Retweets" will be dropped when creating dataset hence 66 - 1 = 65
 		self.model = load_model(model_path, inp_size, hidden_size, out_size)
 
 	def randomize(self):
@@ -100,7 +102,7 @@ class Main(qtw.QWidget, Ui_Form):
 		self.entitiesCountEdit.setText( str(len(data_point['Entities'].split(' '))) )
 		self.value_selected_randomly_from_dataset = False
 
-		self.trueValueIndex.setText(f'Data referenced. Index: {index}. Tweet Id: {self.tweet_id}.')
+		self.trueValueIndex.setText(f'Data referenced. Index: {index}. Tweet Id: {self.tweet_id}. \nCurrent Username: {self.username}. ')
 		self.true_value_label = str(data_point['#Retweets'])
 		self._update_values(self.true_value_label, self.trueValueLabel)
 
@@ -108,7 +110,7 @@ class Main(qtw.QWidget, Ui_Form):
 		if self.value_selected_randomly_from_dataset: return
 
 		# reset true label to 0 because no real data referenced. this is custom data
-		self.trueValueIndex.setText(f'No real data referenced. You are entering custom data.')
+		self.trueValueIndex.setText(f'No real data referenced. \nCurrent Username: {self.username}.')
 		self.true_value_label = 0
 		self._update_values("-", self.trueValueLabel)
 
@@ -117,7 +119,7 @@ class Main(qtw.QWidget, Ui_Form):
 		self.values = self._read_values()
 
 		# coerce datatypes
-		self.input = coerce_datatype( dict(zip(self.headers, self.values)), self.mention_embeddings, self.hashtag_embeddings )
+		self.input = coerce_datatype( dict(zip(self.headers, self.values)), self.mention_embeddings, self.hashtag_embeddings, lookup_user=self.data )
 
 		# feed into model
 		model_out = predict(self.model, self.input) # (true, pred)
@@ -150,7 +152,7 @@ class Main(qtw.QWidget, Ui_Form):
 		      	[sentiment],
 		      	[mentions],
 		      	[hashtags],
-		      	[0], # URLs
+		      	[0], # URLs ignored
 		      ])
 
 	def _update_values(self, string, label):

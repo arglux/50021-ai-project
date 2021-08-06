@@ -102,8 +102,40 @@ def unpackcol(dataframe,cols):
 		dataframe = pd.concat([dataframe, unpacked], axis=1, join='inner')
 	return dataframe
 
+def find_user_stats(path, protocol="pickle", save=False):
+	# Load raw data
+	if protocol == "pickle": data = pd.read_pickle(path)
+	elif protocol == "df": data = path # pass the df
+
+	# Number of unique users
+	# print(data['Username'].nunique())
+
+	# Group by users
+	df=data.groupby('Username')[['#Followers', '#Friends', '#Retweets', '#Favorites']]
+
+	# Get minimum
+	df_min=df.min().apply(lambda x: np.log10(x+1))
+	df_min.rename(columns=lambda x: x + "_min", inplace=True)
+
+	# Get maximum
+	df_max=df.max().apply(lambda x: np.log10(x+1))
+	df_max.rename(columns=lambda x: x + "_max", inplace=True)
+
+	# Get mean
+	df_mean=df.mean().apply(lambda x: np.log10(x+1))
+	df_mean.rename(columns=lambda x: x + "_mean", inplace=True)
+
+	# Save pickle and return dataframe
+	df=pd.concat([df_min, df_max, df_mean], axis=1)
+	if save: df.to_pickle('user-stats.pkl')
+	return df
+
 if __name__ == '__main__':
+	from headers import *
 	print("OK")
+	data = pd.read_csv("../data/TweetsCOV19_052020.tsv.gz", compression='gzip', names=headers, sep='\t', quotechar='"')
+	user_stats = find_user_stats(data, protocol="df")
+	print(user_stats)
 
 
 
