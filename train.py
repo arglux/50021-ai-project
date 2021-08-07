@@ -46,7 +46,7 @@ if __name__ == "__main__":
 	input_size = 77
 	hidden_size = 32
 	output_size = 1
-	learning_rate = 0.001
+	learning_rate = 0.01
 	num_epochs = 15
 
 	model = LinReg2(input_size, hidden_size, output_size)
